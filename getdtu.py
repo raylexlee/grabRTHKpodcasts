@@ -65,7 +65,8 @@ def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
             audio_html = urlopen(urljoin(base, podcast.a["href"]))
             bsObjAudio = BeautifulSoup(audio_html, "lxml")
             audio_url  = bsObjAudio.find("audio").get("src")
-            audio_title = podcast.find("span",{"class":"title"}).string.translate(tranTable)
+     #       audio_title = podcast.find("span",{"class":"title"}).string.translate(tranTable)
+            audio_title = podcast.find("span",{"class":"title"}).string
             audio_date  = podcast.find("span",{"class":"date"}).string
             if pre_date == True: 
                 audio_title = audio_date + audio_title
