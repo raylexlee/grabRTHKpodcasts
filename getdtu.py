@@ -9,6 +9,26 @@ from tqdm import tqdm
 import requests
 import argparse
 from programs import ProgOf
+import jinja2
+from jinja2 import Template
+
+frontpageContext = {
+'broadcast_date': '2019-02-11',
+'title' : 'NotExist',
+'podcasts' : []
+}
+
+def SetupJinja():
+    html_jinja_env = jinja2.Environment(
+	    trim_blocks = True,
+	    lstrip_blocks = True,
+	    autoescape = False,
+	    loader = jinja2.FileSystemLoader(os.path.abspath('.'))
+    )
+    template = html_jinja_env.get_template('frontpage_template.j2')
+    return
+
+#print(template.render(frontpageContext))
 
 def PrintAllpCodes():
     i = 0
@@ -36,6 +56,31 @@ def dl_tqdm_(url, file_name):
 
 def Base(ProgramCode):
      return "http://podcast.rthk.hk/podcast/item_all.php?pid="+ProgramCode+"&lang=zh-CN"
+
+def OutputOneSeriesHtml():
+    return
+
+def ProcessEpisode(_date, _title, _url):
+    x = _title.split("(")
+    title = x[0].rstrip()
+    caption = x[1]
+    episode = {
+                  'caption' : caption,
+                  'url' : _url
+              }
+    if title != frontpageContext["title"]:
+        OutputOneSeriesHtml()
+        frontpageContext["broadcast_date"] = _date
+        frontpageContext["title"] = title
+        frontpageContext["podcasts"] = [
+            episode
+        ]
+    else:
+        frontpageContext"podcasts"].insert(0, episode)
+    return    
+
+
+
 
 def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
     if pCode not in ProgOf:
@@ -105,5 +150,6 @@ def check_arg(args=None):
             results.grab)
 
 if __name__ == '__main__':
+    SetupJinja()
     p, f, t, d, g = check_arg(sys.argv[1:])
     sys.exit(grabPodcasts(p, f, t, d, g))
