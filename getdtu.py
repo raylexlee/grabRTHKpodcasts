@@ -46,7 +46,7 @@ def dl_tqdm_(url, file_name):
     r = requests.get(url, stream=True)
 
     # Total size in bytes.
-    total_size = int(r.headers.get('content-length', 0)); 
+    total_size = int(r.headers.get('content-length', 0)) 
 
     with tqdm(desc=file_name, total=total_size, ncols=50, unit='B', unit_scale=True) as pbar:
         with open(file_name, 'wb') as f:
@@ -58,25 +58,35 @@ def Base(ProgramCode):
      return "http://podcast.rthk.hk/podcast/item_all.php?pid="+ProgramCode+"&lang=zh-CN"
 
 def OutputOneSeriesHtml():
+    print(frontpageContext)
     return
 
 def ProcessEpisode(_date, _title, _url):
-    x = _title.split("(")
-    title = x[0].rstrip()
-    caption = x[1]
+    if _title.find("（") == -1:
+        x = _title.split("(")
+    else:
+        x = _title.split("（")    
+    title = x[0].rstrip().lstrip()
+    try:
+        caption = x[1]
+    except:
+        print(x)    
+        print(frontpageContext)
     episode = {
                   'caption' : caption,
                   'url' : _url
               }
     if title != frontpageContext["title"]:
-        OutputOneSeriesHtml()
+        if frontpageContext["title"] != "NotExist":
+            OutputOneSeriesHtml()
         frontpageContext["broadcast_date"] = _date
         frontpageContext["title"] = title
         frontpageContext["podcasts"] = [
             episode
         ]
     else:
-        frontpageContext"podcasts"].insert(0, episode)
+        frontpageContext["broadcast_date"] = _date
+        frontpageContext["podcasts"].insert(0, episode)
     return    
 
 
@@ -87,21 +97,10 @@ def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
         PrintAllpCodes()
         return 1
     base = Base(pCode)
-    in_tran  = '/:上中下一二三四五六七八九十'
-    out_tran = '-_ABC123456789O'
-    del_tran = " ()\t"
-    tranTable = str.maketrans(in_tran, out_tran, del_tran)
     html = urlopen(base)
     bsObj = BeautifulSoup(html,"lxml")
-    titlePath = bsObj.title.string[9:].translate(tranTable)
-    # if grab_now == True:
-    #    if os.path.exists(titlePath) == False:
-    #        os.mkdir(titlePath)
-    print(titlePath)
     years = bsObj.findAll("a",{"class":re.compile("yearBox")})
     for year in years:
-        if pre_date == False:
-            print(year.string)
         if year["class"][1] == "close":
             html = urlopen(urljoin(base, year["href"]))
             bsObj = BeautifulSoup(html,"lxml")
@@ -110,18 +109,10 @@ def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
             audio_html = urlopen(urljoin(base, podcast.a["href"]))
             bsObjAudio = BeautifulSoup(audio_html, "lxml")
             audio_url  = bsObjAudio.find("audio").get("src")
-     #       audio_title = podcast.find("span",{"class":"title"}).string.translate(tranTable)
             audio_title = podcast.find("span",{"class":"title"}).string
             audio_date  = podcast.find("span",{"class":"date"}).string
-            if pre_date == True: 
-                audio_title = audio_date + audio_title
-            if from_date <= audio_date <= to_date:
-                #download(audio_url, titlePath+'/'+audio_title+'.mp3')
-                if grab_now == True:
-                #    dl_tqdm_(audio_url, titlePath+'/'+audio_title+'.mp3')
-                    print(audio_title+' '+audio_url)
-                else:
-                    print(audio_title)
+            ProcessEpisode(audio_date, audio_title, audio_url)
+    OutputOneSeriesHtml()
     return 0
 
 def check_arg(args=None):
