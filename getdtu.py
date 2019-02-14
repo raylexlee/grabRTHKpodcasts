@@ -15,9 +15,9 @@ from jinja2 import Template
 frontpageContext = {
 'broadcast_date': '2019-02-11',
 'title' : 'NotExist',
+'episodes' : 0,
 'podcasts' : []
 }
-
 def SetupJinja():
     html_jinja_env = jinja2.Environment(
 	    trim_blocks = True,
@@ -25,8 +25,7 @@ def SetupJinja():
 	    autoescape = False,
 	    loader = jinja2.FileSystemLoader(os.path.abspath('.'))
     )
-    template = html_jinja_env.get_template('frontpage_template.j2')
-    return
+    return html_jinja_env.get_template('podcastpage_template.j2')
 
 #print(template.render(frontpageContext))
 
@@ -58,15 +57,22 @@ def Base(ProgramCode):
      return "http://podcast.rthk.hk/podcast/item_all.php?pid="+ProgramCode+"&lang=zh-CN"
 
 def OutputOneSeriesHtml():
-    print(frontpageContext)
+    # print(frontpageContext)
+    f = open(frontpageContext["title"]+".html","w")
+    f.write(template.render(frontpageContext))
     return
 
 def ProcessEpisode(_date, _title, _url):
     if _title.find("（") == -1:
         x = _title.split("(")
     else:
-        x = _title.split("（")    
+        if _date == '2011-12-23':
+            x = _title.split("(")
+        else:    
+            x = _title.split("（")    
     title = x[0].rstrip().lstrip()
+    if title == '彼得大帝':
+        title = '彼德大帝'
     try:
         caption = x[1]
     except:
@@ -81,12 +87,14 @@ def ProcessEpisode(_date, _title, _url):
             OutputOneSeriesHtml()
         frontpageContext["broadcast_date"] = _date
         frontpageContext["title"] = title
+        frontpageContext["episodes"] = 1
         frontpageContext["podcasts"] = [
             episode
         ]
     else:
         frontpageContext["broadcast_date"] = _date
         frontpageContext["podcasts"].insert(0, episode)
+        frontpageContext["episodes"] = frontpageContext["episodes"] + 1
     return    
 
 
@@ -141,6 +149,6 @@ def check_arg(args=None):
             results.grab)
 
 if __name__ == '__main__':
-    SetupJinja()
+    template = SetupJinja()
     p, f, t, d, g = check_arg(sys.argv[1:])
     sys.exit(grabPodcasts(p, f, t, d, g))

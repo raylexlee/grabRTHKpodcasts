@@ -6,8 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="{{ title }}">
-<title>{{ title }}</title>
+<meta name="apple-mobile-web-app-title" content="列寧">
+<title>列寧</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,19 +16,25 @@
 Sorry, your browser does not support HTML5 audio.
 </audio>
 <div id="playlist">
-{% for podcast in podcasts %}	
-<div><a href="{{ podcast.url }}">{{ loop.index }}</a></div>
-{%- endfor %}   
+	
+<div><a href="http://app3.rthk.hk/podcast/media/people/287_1106131714_55872.mp3">1</a></div>	
+<div><a href="http://app3.rthk.hk/podcast/media/people/287_1106131718_46050.mp3">2</a></div>	
+<div><a href="http://app3.rthk.hk/podcast/media/people/287_1106131722_20756.mp3">3</a></div>	
+<div><a href="http://app3.rthk.hk/podcast/media/people/287_1106131727_97179.mp3">4</a></div>	
+<div><a href="http://app3.rthk.hk/podcast/media/people/287_1106131732_28200.mp3">5</a></div>   
 </div>
 <pre>
-{{ broadcast_date }}
-{% for podcast in podcasts %}	
-{{ podcast.caption }}   
-{%- endfor %}   
+2011-06-17
+	
+一)	
+二)	
+三)	
+四)	
+五)   
 </pre>
 <script type="text/javascript">
 var podcast = {
-	episodes: {{ episodes }}
+	episodes: 5
 }
 </script>
 <script type='text/javascript' src="podcastapp.js"></script>

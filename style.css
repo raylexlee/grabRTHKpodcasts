@@ -1,0 +1,21 @@
+:root {
+  --colNum: 10;
+}
+p , pre  {font-size: 20px;}    
+#audio{background:#666;width:94%;padding:20px;}
+.active a{color:#5DB0E6;text-decoration:none;}
+div a{color:black;}
+div a:hover{text-decoration:none;}
+#playlist {
+  display: grid;
+  grid-template-columns: repeat(var(--colNum), 1fr);
+  background-color: green;
+  padding: 3px;
+}
+#playlist > div  {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid black;
+  padding: 4px;
+  text-align: center;
+  font-size: 20px;
+}
