@@ -11,6 +11,14 @@ import argparse
 from programs import ProgOf
 import jinja2
 from jinja2 import Template
+html_jinja_env = jinja2.Environment(
+    trim_blocks = True,
+    lstrip_blocks = True,
+    autoescape = False,
+    loader = jinja2.FileSystemLoader(os.path.abspath('.'))
+    )
+template = html_jinja_env.get_template('podcastpage_template.j2')
+indexpagetemplate = html_jinja_env.get_template('indexpage_template.j2')
 
 frontpageContext = {
 'broadcast_date': '2019-02-11',
@@ -18,16 +26,43 @@ frontpageContext = {
 'episodes' : 0,
 'podcasts' : []
 }
-def SetupJinja():
-    html_jinja_env = jinja2.Environment(
-	    trim_blocks = True,
-	    lstrip_blocks = True,
-	    autoescape = False,
-	    loader = jinja2.FileSystemLoader(os.path.abspath('.'))
-    )
-    return html_jinja_env.get_template('podcastpage_template.j2')
 
-#print(template.render(frontpageContext))
+# indexpageContext = {
+#          'title' : ProgOf["287"]
+#         'years' : [
+#             {
+#                 'name' : '2011',
+#                 'podcasts' : [
+#                     {
+#                         'title' : 'sample',
+#                         'episodes' : 14
+#                         }
+#                     ]
+#                 }
+#             ]        
+# }
+
+indexpageContext = {
+'years' : []
+}
+
+def InsertIntoIndexPageContext():
+    year = {}
+    year["name"] = frontpageContext["broadcast_date"][0:4]
+    podcast = {
+            'title' : frontpageContext["title"],
+            'episodes' : frontpageContext["episodes"]
+            }
+    found = False
+    for itemyear in indexpageContext["years"]:
+        if itemyear["name"] == year["name"]:
+           itemyear["podcasts"].insert(0, podcast)
+           found = True
+           break
+    if not found:
+        year["podcasts"] = [ podcast ]
+        indexpageContext["years"].insert(0, year)
+    return
 
 def PrintAllpCodes():
     i = 0
@@ -60,6 +95,12 @@ def OutputOneSeriesHtml():
     # print(frontpageContext)
     f = open(frontpageContext["title"]+".html","w")
     f.write(template.render(frontpageContext))
+    InsertIntoIndexPageContext()
+    return
+
+def CompileIndexPage():
+    f = open("index.html","w")
+    f.write(indexpagetemplate.render(indexpageContext))
     return
 
 def ProcessEpisode(_date, _title, _url):
@@ -107,6 +148,7 @@ def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
     base = Base(pCode)
     html = urlopen(base)
     bsObj = BeautifulSoup(html,"lxml")
+    indexpageContext["title"] = ProgOf[pCode]
     years = bsObj.findAll("a",{"class":re.compile("yearBox")})
     for year in years:
         if year["class"][1] == "close":
@@ -121,6 +163,7 @@ def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
             audio_date  = podcast.find("span",{"class":"date"}).string
             ProcessEpisode(audio_date, audio_title, audio_url)
     OutputOneSeriesHtml()
+    CompileIndexPage()
     return 0
 
 def check_arg(args=None):
@@ -149,6 +192,5 @@ def check_arg(args=None):
             results.grab)
 
 if __name__ == '__main__':
-    template = SetupJinja()
     p, f, t, d, g = check_arg(sys.argv[1:])
     sys.exit(grabPodcasts(p, f, t, d, g))
