@@ -95,6 +95,7 @@ def OutputOneSeriesHtml():
     # print(frontpageContext)
     f = open(frontpageContext["title"]+".html","w")
     f.write(template.render(frontpageContext))
+    print(frontpageContext["title"]+".html")
     InsertIntoIndexPageContext()
     return
 
@@ -103,17 +104,25 @@ def CompileIndexPage():
     f.write(indexpagetemplate.render(indexpageContext))
     return
 
-def ProcessEpisode(_date, _title, _url):
-    if _title.find("（") == -1:
-        x = _title.split("(")
-    else:
-        if _date == '2011-12-23':
+def ProcessEpisode(_date, _title, _url, pCode):
+    if pCode == '287':
+        if _title.find("（") == -1:
             x = _title.split("(")
-        else:    
-            x = _title.split("（")    
-    title = x[0].rstrip().lstrip()
-    if title == '彼得大帝':
-        title = '彼德大帝'
+        else:
+            if _date == '2011-12-23':
+                x = _title.split("(")
+            else:    
+                x = _title.split("（")    
+        title = x[0].rstrip().lstrip()
+        if title == '彼得大帝':
+            title = '彼德大帝'
+    #elif pCode == '328':        
+    else:
+        if _title.find("(") == -1:
+            x = _title.split("-")
+        else:
+            x = _title.split("(")    
+        title = x[0].rstrip().lstrip()
     try:
         caption = x[1]
     except:
@@ -161,8 +170,12 @@ def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
             audio_url  = bsObjAudio.find("audio").get("src")
             audio_title = podcast.find("span",{"class":"title"}).string
             audio_date  = podcast.find("span",{"class":"date"}).string
-            ProcessEpisode(audio_date, audio_title, audio_url)
+            ProcessEpisode(audio_date, audio_title, audio_url, pCode)
     OutputOneSeriesHtml()
+    urlpic = "http://podcast.rthk.hk/podcast/upload_photo/item_photo/170x170_"+pCode+".jpg"
+    fnamepic = "170x170_"+pCode+".jpg"
+    dl_tqdm_(urlpic, fnamepic)
+    indexpageContext["pCode"] = pCode
     CompileIndexPage()
     return 0
 

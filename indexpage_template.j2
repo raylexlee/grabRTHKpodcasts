@@ -34,7 +34,7 @@
 <section class="navigation">
   <div class="nav-container">
     <div class="brand">
-	  <img src="images/radio.png" width="auto" height="70" />
+	    <img src="170x170_{{ pCode }}.jpg" width="auto" height="70" />
 	  <div class="subtitle">{{ title }}<br />手機優化版</div>
     </div>
     <nav>
@@ -48,10 +48,10 @@
                    <ul class="nav-dropdown">
    {% for podcast in year.podcasts %}
 			   <li><a href="{{ podcast.title }}.html">{{ podcast.title }} ({{ podcast.episodes }})</a></li>
-   {%- endfor %}
+   {% endfor %}
                    </ul>
           </li>
-{%- endfor %}
+{% endfor %}
       </ul>
     </nav>
   </div>
