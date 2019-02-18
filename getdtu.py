@@ -155,6 +155,12 @@ def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
         PrintAllpCodes()
         return 1
     base = Base(pCode)
+  # in_tran  = '/:上中下一二三四五六七八九十'
+    in_tran  = ''
+  # out_tran = '-_ABC123456789O'
+    out_tran = ''
+    del_tran = " ?\t"
+    tranTable = str.maketrans(in_tran, out_tran, del_tran)
     html = urlopen(base)
     bsObj = BeautifulSoup(html,"lxml")
     indexpageContext["title"] = ProgOf[pCode]
@@ -168,7 +174,7 @@ def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
             audio_html = urlopen(urljoin(base, podcast.a["href"]))
             bsObjAudio = BeautifulSoup(audio_html, "lxml")
             audio_url  = bsObjAudio.find("audio").get("src")
-            audio_title = podcast.find("span",{"class":"title"}).string
+            audio_title = podcast.find("span",{"class":"title"}).string.translate(tranTable)
             audio_date  = podcast.find("span",{"class":"date"}).string
             ProcessEpisode(audio_date, audio_title, audio_url, pCode)
     OutputOneSeriesHtml()
