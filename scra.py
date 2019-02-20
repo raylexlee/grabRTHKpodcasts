@@ -8,8 +8,10 @@ from sys import argv
 from tqdm import tqdm
 import requests
 import argparse
-from programs import ProgOf
-
+import pickle
+# from programs import ProgOf
+pickle_in = open('ProgOf.pickle','rb')
+ProgOf = pickle.load(pickle_in)
 def PrintAllpCodes():
     i = 0
     for key in ProgOf:

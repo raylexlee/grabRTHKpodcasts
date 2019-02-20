@@ -8,9 +8,12 @@ from sys import argv
 from tqdm import tqdm
 import requests
 import argparse
-from programs import ProgOf
+# from programs import ProgOf
+import pickle
 import jinja2
 from jinja2 import Template
+pickle_in = open('ProgOf.pickle','rb')
+ProgOf = pickle.load(pickle_in)
 html_jinja_env = jinja2.Environment(
     trim_blocks = True,
     lstrip_blocks = True,
@@ -150,7 +153,7 @@ def ProcessEpisode(_date, _title, _url, pCode):
 
 
 
-def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
+def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
     if pCode not in ProgOf:
         PrintAllpCodes()
         return 1
@@ -176,7 +179,12 @@ def grabPodcasts(pCode, from_date, to_date, pre_date, grab_now):
             audio_url  = bsObjAudio.find("audio").get("src")
             audio_title = podcast.find("span",{"class":"title"}).string.translate(tranTable)
             audio_date  = podcast.find("span",{"class":"date"}).string
-            ProcessEpisode(audio_date, audio_title, audio_url, pCode)
+            if display_only:
+                print(audio_date, audio_title, audio_url)
+            else:    
+                ProcessEpisode(audio_date, audio_title, audio_url, pCode)
+    if display_only:
+        return 0
     OutputOneSeriesHtml()
     urlpic = "http://podcast.rthk.hk/podcast/upload_photo/item_photo/170x170_"+pCode+".jpg"
     fnamepic = "170x170_"+pCode+".jpg"
@@ -197,18 +205,18 @@ def check_arg(args=None):
     parser.add_argument('-t', '--todate',
                         help='to YYYY-MM-DD',
                         default='3000-07-01')
-    parser.add_argument('-d', '--date',
+    parser.add_argument('-d', '--displayonly',
                         action='store_true',
                         help='Prefix date to the mp3 filename')
-    parser.add_argument('-g', '--grab',
+    parser.add_argument('-g', '--generate',
                         action='store_true',
-                        help='Grab podcasts')
+                        help='Generate pickle')
     results = parser.parse_args(args)
     return (results.prog,
             results.fromdate,
             results.todate,
-            results.date,
-            results.grab)
+            results.displayonly,
+            results.generate)
 
 if __name__ == '__main__':
     p, f, t, d, g = check_arg(sys.argv[1:])
