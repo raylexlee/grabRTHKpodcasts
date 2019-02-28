@@ -185,12 +185,15 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
                 ProcessEpisode(audio_date, audio_title, audio_url, pCode)
     if display_only:
         return 0
-    OutputOneSeriesHtml()
-    urlpic = "http://podcast.rthk.hk/podcast/upload_photo/item_photo/170x170_"+pCode+".jpg"
-    fnamepic = "170x170_"+pCode+".jpg"
-    dl_tqdm_(urlpic, fnamepic)
-    indexpageContext["pCode"] = pCode
-    CompileIndexPage()
+    elif generate_pickle:
+        SavePickle()
+    else:         
+        OutputOneSeriesHtml()
+        urlpic = "http://podcast.rthk.hk/podcast/upload_photo/item_photo/170x170_"+pCode+".jpg"
+        fnamepic = "170x170_"+pCode+".jpg"
+        dl_tqdm_(urlpic, fnamepic)
+        indexpageContext["pCode"] = pCode
+        CompileIndexPage()
     return 0
 
 def check_arg(args=None):
