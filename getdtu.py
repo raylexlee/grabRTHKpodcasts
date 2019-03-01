@@ -119,6 +119,15 @@ def ProcessEpisode(_date, _title, _url, pCode):
         title = x[0].rstrip().lstrip()
         if title == '彼得大帝':
             title = '彼德大帝'
+    elif pCode == '1069':
+        if _title.find("（") == -1:
+            if _title.find("(") == -1:
+                x = [_title, _title]
+            else:
+                x = _title.split("(")    
+        else:    
+            x = _title.split("（")    
+        title = x[0].rstrip().lstrip()
     #elif pCode == '328':        
     else:
         if _title.find("(") == -1:
