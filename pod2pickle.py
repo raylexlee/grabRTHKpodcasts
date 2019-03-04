@@ -42,7 +42,7 @@ frontpageContext = {
 #                         }
 #                     ]
 #                 }
-#             ]        
+#             ]         
 # }
 
 indexpageContext = {
@@ -119,6 +119,15 @@ def ProcessEpisode(_date, _title, _url, pCode):
         title = x[0].rstrip().lstrip()
         if title == '彼得大帝':
             title = '彼德大帝'
+    elif pCode == '1069':
+        if _title.find("（") == -1:
+            if _title.find("(") == -1:
+                x = [_title, _title]
+            else:
+                x = _title.split("(")    
+        else:    
+            x = _title.split("（")    
+        title = x[0].rstrip().lstrip()
     #elif pCode == '328':        
     else:
         if _title.find("(") == -1:
@@ -185,15 +194,15 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
                 ProcessEpisode(audio_date, audio_title, audio_url, pCode)
     if display_only:
         return 0
-    elif generate_pickle:
+    if generate_pickle:
         SavePickle()
-    else:         
-        OutputOneSeriesHtml()
-        urlpic = "http://podcast.rthk.hk/podcast/upload_photo/item_photo/170x170_"+pCode+".jpg"
-        fnamepic = "170x170_"+pCode+".jpg"
-        dl_tqdm_(urlpic, fnamepic)
-        indexpageContext["pCode"] = pCode
-        CompileIndexPage()
+        return 0    
+    OutputOneSeriesHtml()
+    urlpic = "http://podcast.rthk.hk/podcast/upload_photo/item_photo/170x170_"+pCode+".jpg"
+    fnamepic = "170x170_"+pCode+".jpg"
+    dl_tqdm_(urlpic, fnamepic)
+    indexpageContext["pCode"] = pCode
+    CompileIndexPage()
     return 0
 
 def check_arg(args=None):
@@ -210,7 +219,7 @@ def check_arg(args=None):
                         default='3000-07-01')
     parser.add_argument('-d', '--displayonly',
                         action='store_true',
-                        help='Prefix date to the mp3 filename')
+                        help='Display the list of date,title,url')
     parser.add_argument('-g', '--generate',
                         action='store_true',
                         help='Generate pickle')

@@ -42,19 +42,42 @@ frontpageContext = {
 #                         }
 #                     ]
 #                 }
-#             ]        
+#             ]         
 # }
+Pages = []
 
 indexpageContext = {
 'years' : []
 }
 
-def InsertIntoIndexPageContext():
+def SavePickle():
+    pickle_out = open("Pages.pickle","wb")
+    pickle.dump(Pages, pickle_out)
+    pickle_out.close()
+    for page in Pages:
+        InsertIntoIndexPageContext(page)        
+    pickle_out = open("Index.pickle","wb")
+    pickle.dump(indexpageContext, pickle_out)
+    pickle_out.close()
+    return
+
+def getPage(title):
+    for page in Pages:
+        if page["title"] == title:
+            return page
+    newpageContext["broadcast_date"] = ""
+    newpageContext["title"] = title
+    newpageContext["episodes"] = 0
+    newpageContext["podcasts"] = []
+    Pages.insert(0, newpageContext)
+    return newpageContext
+
+def InsertIntoIndexPageContext(page):
     year = {}
-    year["name"] = frontpageContext["broadcast_date"][0:4]
+    year["name"] = page["broadcast_date"][0:4]
     podcast = {
-            'title' : frontpageContext["title"],
-            'episodes' : frontpageContext["episodes"]
+            'title' : page["title"],
+            'episodes' : page["episodes"]
             }
     found = False
     for itemyear in indexpageContext["years"]:
@@ -99,7 +122,7 @@ def OutputOneSeriesHtml():
     f = open(frontpageContext["title"]+".html","w")
     f.write(template.render(frontpageContext))
     print(frontpageContext["title"]+".html")
-    InsertIntoIndexPageContext()
+    InsertIntoIndexPageContext(frontpageContext)
     return
 
 def CompileIndexPage():
@@ -107,7 +130,7 @@ def CompileIndexPage():
     f.write(indexpagetemplate.render(indexpageContext))
     return
 
-def ProcessEpisode(_date, _title, _url, pCode):
+def ProcessEpisode(_date, _title, _url, pCode, generate_pickle):
     if pCode == '287':
         if _title.find("（") == -1:
             x = _title.split("(")
@@ -144,6 +167,13 @@ def ProcessEpisode(_date, _title, _url, pCode):
                   'caption' : caption,
                   'url' : _url
               }
+    if generate_pickle:
+        page = getPage(title)
+        page["broadcast_date"] = _date
+        page["podcasts"].insert(0, episode)
+        page["episodes"] = page["episodes"] + 1
+        return          
+    
     if title != frontpageContext["title"]:
         if frontpageContext["title"] != "NotExist":
             OutputOneSeriesHtml()
@@ -191,9 +221,12 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
             if display_only:
                 print(audio_date, audio_title, audio_url)
             else:    
-                ProcessEpisode(audio_date, audio_title, audio_url, pCode)
+                ProcessEpisode(audio_date, audio_title, audio_url, pCode, generate_pickle)
     if display_only:
         return 0
+    if generate_pickle:
+        SavePickle()
+        return 0    
     OutputOneSeriesHtml()
     urlpic = "http://podcast.rthk.hk/podcast/upload_photo/item_photo/170x170_"+pCode+".jpg"
     fnamepic = "170x170_"+pCode+".jpg"
@@ -216,7 +249,7 @@ def check_arg(args=None):
                         default='3000-07-01')
     parser.add_argument('-d', '--displayonly',
                         action='store_true',
-                        help='Prefix date to the mp3 filename')
+                        help='Display the list of date,title,url')
     parser.add_argument('-g', '--generate',
                         action='store_true',
                         help='Generate pickle')
