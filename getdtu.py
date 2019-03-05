@@ -51,25 +51,28 @@ indexpageContext = {
 }
 
 def SavePickle():
-    pickle_out = open("Pages.pickle","wb")
-    pickle.dump(Pages, pickle_out)
-    pickle_out.close()
+    #pickle_out = open("Pages.pickle","wb")
+    #pickle.dump(Pages, pickle_out)
+    #pickle_out.close()
+    print(Pages)
     for page in Pages:
         InsertIntoIndexPageContext(page)        
-    pickle_out = open("Index.pickle","wb")
-    pickle.dump(indexpageContext, pickle_out)
-    pickle_out.close()
+    print(indexpageContext)    
+    #pickle_out = open("Index.pickle","wb")
+    #pickle.dump(indexpageContext, pickle_out)
+    #pickle_out.close()
     return
 
 def getPage(title):
     for page in Pages:
         if page["title"] == title:
             return page
+    newpageContext = frontpageContext.copy()        
     newpageContext["broadcast_date"] = ""
     newpageContext["title"] = title
     newpageContext["episodes"] = 0
     newpageContext["podcasts"] = []
-    Pages.insert(0, newpageContext)
+    Pages.append(newpageContext)
     return newpageContext
 
 def InsertIntoIndexPageContext(page):
