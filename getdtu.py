@@ -54,10 +54,10 @@ def SavePickle():
     #pickle_out = open("Pages.pickle","wb")
     #pickle.dump(Pages, pickle_out)
     #pickle_out.close()
-    print(Pages)
+    #print(Pages)
     for page in Pages:
-        InsertIntoIndexPageContext(page)        
-    print(indexpageContext)    
+        OutputOneSeriesHtml(page)
+    #print(indexpageContext)    
     #pickle_out = open("Index.pickle","wb")
     #pickle.dump(indexpageContext, pickle_out)
     #pickle_out.close()
@@ -120,12 +120,12 @@ def dl_tqdm_(url, file_name):
 def Base(ProgramCode):
      return "http://podcast.rthk.hk/podcast/item_all.php?pid="+ProgramCode+"&lang=zh-CN"
 
-def OutputOneSeriesHtml():
-    # print(frontpageContext)
-    f = open(frontpageContext["title"]+".html","w")
-    f.write(template.render(frontpageContext))
-    print(frontpageContext["title"]+".html")
-    InsertIntoIndexPageContext(frontpageContext)
+def OutputOneSeriesHtml(page):
+    # print(page)
+    f = open(page["title"]+".html","w")
+    f.write(template.render(page))
+    print(page["title"]+".html")
+    InsertIntoIndexPageContext(page)
     return
 
 def CompileIndexPage():
@@ -179,7 +179,7 @@ def ProcessEpisode(_date, _title, _url, pCode, generate_pickle):
     
     if title != frontpageContext["title"]:
         if frontpageContext["title"] != "NotExist":
-            OutputOneSeriesHtml()
+            OutputOneSeriesHtml(frontpageContext)
         frontpageContext["broadcast_date"] = _date
         frontpageContext["title"] = title
         frontpageContext["episodes"] = 1
@@ -229,8 +229,8 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
         return 0
     if generate_pickle:
         SavePickle()
-        return 0    
-    OutputOneSeriesHtml()
+    else:
+        OutputOneSeriesHtml(frontpageContext)
     urlpic = "http://podcast.rthk.hk/podcast/upload_photo/item_photo/170x170_"+pCode+".jpg"
     fnamepic = "170x170_"+pCode+".jpg"
     dl_tqdm_(urlpic, fnamepic)
