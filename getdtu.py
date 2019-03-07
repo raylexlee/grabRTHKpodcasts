@@ -155,6 +155,12 @@ def ProcessEpisode(_date, _title, _url, pCode, generate_pickle):
             x = _title.split("（")    
         title = x[0].rstrip().lstrip()
     #elif pCode == '328':        
+    elif pCode == '486':        
+        if _title.find("(") == -1:
+            x = [_title, _title]
+        else:
+            x = _title.split("(")    
+        title = x[0].rstrip().lstrip()
     elif pCode == '249':        
         if _title.startswith("佛經講座："):
             _title = _title[5:]
