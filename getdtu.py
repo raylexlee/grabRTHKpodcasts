@@ -224,7 +224,7 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
     in_tran  = ''
   # out_tran = '-_ABC123456789O'
     out_tran = ''
-    del_tran = " ?\t"
+    del_tran = " ?\t'"
     tranTable = str.maketrans(in_tran, out_tran, del_tran)
     html = urlopen(base)
     bsObj = BeautifulSoup(html,"lxml")
