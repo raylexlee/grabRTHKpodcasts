@@ -5,8 +5,10 @@ from urllib.parse import urljoin
 import os, sys
 import re
 import pickle
-culturalPodcastsUrl = 'http://podcast.rthk.hk/podcast/list_category.php?lang=zh-CN&action=do_rthk_cat&rthk_cat=%E6%96%87%E5%8C%96'
-html = urlopen(culturalPodcastsUrl)
+# culturalPodcastsUrl = 'http://podcast.rthk.hk/podcast/list_category.php?lang=zh-CN&action=do_rthk_cat&rthk_cat=%E6%96%87%E5%8C%96'
+# html = urlopen(culturalPodcastsUrl)
+allPodcastsUrl = 'http://podcast.rthk.hk/podcast/list_all.php?lang=zh-CN'
+html = urlopen(allPodcastsUrl)
 bsObj = BeautifulSoup(html,"lxml")
 podcastsLinks = bsObj.findAll("a",{"href":re.compile("item_epi")})
 ProgOf = {}
