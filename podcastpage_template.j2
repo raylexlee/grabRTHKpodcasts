@@ -21,11 +21,13 @@ Sorry, your browser does not support HTML5 audio.
 {%- endfor %}   
 </div>
 <pre>
+{{ title }}
 {{ broadcast_date }}
 {% for podcast in podcasts %}	
 {{ podcast.caption }}   
 {%- endfor %}   
 </pre>
+<a href="index.html">回到目錄</a>
 <script type="text/javascript">
 var podcast = {
 	episodes: {{ episodes }}
