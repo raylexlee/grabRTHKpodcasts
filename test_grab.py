@@ -2,6 +2,7 @@
 from urllib.request  import urlopen  
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+from lxml import etree
 import os, sys
 import re
 from sys import argv
@@ -235,14 +236,18 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
     years = bsObj.findAll("option",{"value":re.compile(r"\d{4}")})
     for year in years:
         page = 0
-        remainder = 99
-        while remainder > 0:
+        remainder = "99"
+        while (remainder != "0"):
             page = page + 1
-            html = urlopen(episodeList(pCode, year["value"], str(page))) 
-            bsObj = BeautifulSoup(html,"lxml")
-            print(html)
+            xml = requests.get(episodeList(pCode, year["value"], str(page))) 
+            root = etree.fromstring(xml.content)
+            remainder = root.xpath('/episodeList/remainder')[0].text
+            for episode in root.xpath('//episode'):
+                audio_date = episode.xpath('episodeDate')[0].text
+                audio_title = episode.xpath('episodeTitle')[0].text
+                audio_url = episode.xpath('mediafile')[0].text
 ##            if display_only:
-#            print(audio_date, audio_title, audio_url)
+                print(audio_date, audio_title, audio_url)
 ##            else:    
 
 def check_arg(args=None):

@@ -2,6 +2,7 @@
 from urllib.request  import urlopen  
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+from lxml import etree
 import os, sys
 import re
 from sys import argv
@@ -219,7 +220,7 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
     if pCode not in ProgOf:
         PrintAllpCodes()
         return 1
-    base = Base(pCode)
+    base = NewBase(pCode)
   # in_tran  = '/:上中下一二三四五六七八九十'
     in_tran  = ''
   # out_tran = '-_ABC123456789O'
@@ -229,22 +230,23 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
     html = urlopen(base)
     bsObj = BeautifulSoup(html,"lxml")
     indexpageContext["title"] = ProgOf[pCode]
-    years = bsObj.findAll("a",{"class":re.compile("yearBox")})
+    years = bsObj.findAll("option",{"value":re.compile(r"\d{4}")})
     for year in years:
-        if year["class"][1] == "close":
-            html = urlopen(urljoin(base, year["href"]))
-            bsObj = BeautifulSoup(html,"lxml")
-        podcastList = bsObj.findAll("div",{"class":"epiItem video"})
-        for podcast in podcastList:
-            audio_html = urlopen(urljoin(base, podcast.a["href"]))
-            bsObjAudio = BeautifulSoup(audio_html, "lxml")
-            audio_url  = bsObjAudio.find("audio").get("src")
-            audio_title = podcast.find("span",{"class":"title"}).string.translate(tranTable)
-            audio_date  = podcast.find("span",{"class":"date"}).string
-            if display_only:
-                print(audio_date, audio_title, audio_url)
-            else:    
-                ProcessEpisode(audio_date, audio_title, audio_url, pCode, generate_pickle)
+        page = 0
+        remainder = "99"
+        while (remainder != "0"):
+            page = page + 1
+            xml = requests.get(episodeList(pCode, year["value"], str(page))) 
+            root = etree.fromstring(xml.content)
+            remainder = root.xpath('/episodeList/remainder')[0].text
+            for episode in root.xpath('//episode'):
+                audio_date = episode.xpath('episodeDate')[0].text
+                audio_title = episode.xpath('episodeTitle')[0].text
+                audio_url = episode.xpath('mediafile')[0].text
+                if display_only:
+                    print(audio_date, audio_title, audio_url)
+                else:    
+                    ProcessEpisode(audio_date, audio_title, audio_url, pCode, generate_pickle)
     if display_only:
         return 0
     if generate_pickle:
@@ -257,6 +259,12 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
     indexpageContext["pCode"] = pCode
     CompileIndexPage()
     return 0
+
+def NewBase(ProgramCode):
+     return "https://podcast.rthk.hk/podcast/item.php?pid="+ProgramCode
+
+def episodeList(ProgramCode, Year, Page):
+     return "https://podcast.rthk.hk/podcast/episodeList.php?pid="+ProgramCode+"&year="+Year+"&page="+Page+"&lang=zh-CN"
 
 def check_arg(args=None):
     parser = argparse.ArgumentParser(description='Grab audio podcasts from RTHK 文化')
