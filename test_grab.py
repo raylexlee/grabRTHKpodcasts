@@ -1,10 +1,6 @@
 #!/usr/bin/python3
-from urllib.request  import urlopen  
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
 from lxml import etree
 import os, sys
-import re
 from sys import argv
 from tqdm import tqdm
 import requests
@@ -223,23 +219,21 @@ def grabPodcasts(pCode, from_date, to_date, display_only, generate_pickle):
     if pCode not in ProgOf:
         PrintAllpCodes()
         return 1
-    base = NewBase(pCode)
   # in_tran  = '/:上中下一二三四五六七八九十'
     in_tran  = ''
   # out_tran = '-_ABC123456789O'
     out_tran = ''
     del_tran = " ?\t'"
     tranTable = str.maketrans(in_tran, out_tran, del_tran)
-    html = urlopen(base)
-    bsObj = BeautifulSoup(html,"lxml")
+    html=requests.get(NewBase(pCode))
     indexpageContext["title"] = ProgOf[pCode]
-    years = bsObj.findAll("option",{"value":re.compile(r"\d{4}")})
+    years = etree.HTML(html.content).xpath('//option[@value]')
     for year in years:
         page = 0
         remainder = "99"
         while (remainder != "0"):
             page = page + 1
-            xml = requests.get(episodeList(pCode, year["value"], str(page))) 
+            xml = requests.get(episodeList(pCode, year.text, str(page))) 
             root = etree.fromstring(xml.content)
             remainder = root.xpath('/episodeList/remainder')[0].text
             for episode in root.xpath('//episode'):
